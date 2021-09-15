@@ -7,8 +7,8 @@ module.exports = {
 	cooldown: 1,
 	
 	execute(message, args) {
-		//add incoming command to the queue only if server admin requests it
-		if (message.author.id == 'id here') {
+		//add incoming command to the queue
+		if (message.author.id == '132287419117600768' || message.author.id == '142820638007099393' || message.author.id == '101868879935991808') {
 			commandqueue = [message, args]
 			message.channel.send("Bot posting started!")
 			//console.log(message.channel);
@@ -23,8 +23,8 @@ const fs = require("fs")
 const { exec } = require('child_process');
 const Discord = require('discord.js');
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
-const guild = client.guilds.fetch('server id');
-const config = require('./auth.json');
+const guild = client.guilds.fetch('733313820499640322');
+const config = require('../auth.json');
 client.login(config.token);
 client.once('ready', () => {
 	console.log('Ready2!');
@@ -60,7 +60,7 @@ setInterval(Queue, 1800000);
 function Start(message, _in) {
 	//initialize base settings
 	//      0   1     2   3  4   5  6     7       8 9  10  11 12     13
-	args = ['', 0.86, 69, 1, '', 0, 1000, 'nomse', , , '', 0, 'mtg', 'model_2020-11-19mtg']
+	args = ['', 0.86, 69, 1, '', 0, 1000, 'nomse', , , '', 0, 'mtg', '2021-07mtg']
 	
 	//random temperature
 	args[1] = randomG(5)+0.4 //RndInteger(50,130)/100
@@ -81,7 +81,7 @@ function Start(message, _in) {
 function CreateManyCards(message, args) {
 	//script takes args in order:
 	//temp, seed, tlevel, primetext, char length, model
-	exec(`bash ./createmany.sh ${args[1]} ${args[5]} ${args[2]} "${args[0]}" ${args[6]} "${args[13]}"`, (err, stdout, stderr) => {
+	exec(`bash ~/mtg-rnn/createmany.sh ${args[1]} ${args[5]} ${args[2]} "${args[0]}" ${args[6]} "${args[13]}"`, (err, stdout, stderr) => {
 		if (err) {
 			console.log("card generate error")
 			args[10].push("card generate error")
@@ -100,7 +100,7 @@ function CreateManyCards(message, args) {
 //generation is different for each.
 function ReadCards(message, args) {
 	//arg input is MSE (true/false)
-	exec(`bash ./prettymany.sh ${args[7]}`, (err, stdout, stderr) => {
+	exec(`bash ~/mtg-rnn/prettymany.sh ${args[7]}`, (err, stdout, stderr) => {
 		Splitcards(message, args)
 	});
 }
@@ -110,10 +110,10 @@ function ReadCards(message, args) {
 //Also takes care of file attachments if requested.
 function Splitcards(message, args) {
 	var datestr = dateTime().replace(/:/g,'').replace(/ /g,'_');
-	fs.rename('./primepretty.txt', `./${datestr}.txt`, () => {
-	fs.rename('./primepretty.txt.mse-set', `./${datestr}.mse-set`, () => {});
+	fs.rename('/mnt/c/mtg-rnn/primepretty.txt', `/mnt/c/mtg-rnn/${datestr}.txt`, () => {
+	fs.rename('/mnt/c/mtg-rnn/primepretty.txt.mse-set', `/mnt/c/mtg-rnn/${datestr}.mse-set`, () => {});
 	
-	fs.readFile(`./${datestr}.txt`, 'utf8' , function (err, data) {
+	fs.readFile(`/mnt/c/mtg-rnn/${datestr}.txt`, 'utf8' , function (err, data) {
 		if (err) {
 			console.log("file read error")
 			message.channel.send("Failed to read from generated file :( Please try again.")
@@ -123,7 +123,7 @@ function Splitcards(message, args) {
 			args[10] = data.split('\n\n')[0];
 			CardCheckpoint(message, args)
 			//delete temp txt file
-			fs.unlinkSync(`./${datestr}.txt`);
+			fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
 		}
 	});
 	});
@@ -227,12 +227,6 @@ function Embed_Newcard(message, args, card) {
 		
 	message.channel.send(Embed).then(async function (_message) {
 		await _message.react('⬆️')
-		await _message.react('➖')
-		await _message.react('👍')
-		await _message.react('👑')
-		await _message.react('💀')
-		await _message.react('😆')
-		await _message.react('🦆')
 	});
 			
 	WriteCardsCreated()
@@ -248,20 +242,10 @@ client.on('messageReactionAdd', async (reaction, user) => {
 		var embed = reaction.message.embeds[0]
 		embed.setFooter(`voted on from #bot-posting-cards`)
 		
-		if (reaction.emoji.name == '⬆️' && reaction.count == 3) {
+		if (reaction.emoji.name == '⬆️' && reaction.count == 4) {
 			reaction.message.react('✅');
 			client.channels.cache.get('791935587065004063').send(embed);
 		}
-		if (reaction.emoji.name == '👑' && reaction.count == 3)
-			client.channels.cache.get('734829844377895022').send(embed);
-		if (reaction.emoji.name == '👍' && reaction.count == 3)
-			client.channels.cache.get('734829897737830563').send(embed);
-		if (reaction.emoji.name == '💀' && reaction.count == 3)
-			client.channels.cache.get('751098812352823347').send(embed);
-		if (reaction.emoji.name == '😆' && reaction.count == 3)
-			client.channels.cache.get('734829863130890301').send(embed);
-		if (reaction.emoji.name == '🦆' && reaction.count == 3)
-			client.channels.cache.get('734452669246079046').send(embed);
 	}
 });
 
@@ -274,13 +258,13 @@ client.on('messageReactionAdd', async (reaction, user) => {
 function WriteCardsCreated(){
 	var _num
 	//read file
-	fs.readFile('./cardscreated.txt', 'utf8', function (err, data) {
+	fs.readFile('/mnt/c/mtg-rnn/cardscreated.txt', 'utf8', function (err, data) {
 		if (err) { console.log(err)}
 		//parse data to int and add to it
 		_num = parseInt(data)
 		_num += parseInt(cardscreated)
 		//write file
-		fs.writeFile('./cardscreated.txt', _num, 'utf8', function (err, data) {
+		fs.writeFile('/mnt/c/mtg-rnn/cardscreated.txt', _num, 'utf8', function (err, data) {
 			_num = 0
 			cardscreated = 0
 		});
@@ -369,7 +353,7 @@ function dateTime() {
 	//get time info for logging
 	var today = new Date();
 	var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-	var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+	var time = today.getHours().toString().padStart(2, '0') + ":" + today.getMinutes().toString().padStart(2, '0') + ":" + today.getSeconds().toString().padStart(2, '0');
 	var dateTime = date+' '+time;
 	
 	return dateTime

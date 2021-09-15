@@ -36,12 +36,12 @@ function Start(message, args) {
 
 //call the function to create the flavor text, output to file
 function CreateFlavor(message, args) {
-	exec(`python3 ~/markov.py ${args[0]} > ./markovout.txt`, (err, stdout, stderr) => {
+	exec(`python3 ~/markov.py ${args[0]} > /mnt/c/mtg-rnn/markovout.txt`, (err, stdout, stderr) => {
 		if (err)
 			console.log(err)
 		else {
 			//read the generated file
-			fs.readFile(`./markovout.txt`, 'utf8' , function (err, data) {
+			fs.readFile(`/mnt/c/mtg-rnn/markovout.txt`, 'utf8' , function (err, data) {
 				if (err)
 					console.log(err)
 				else

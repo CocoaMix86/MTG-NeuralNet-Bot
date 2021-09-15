@@ -68,6 +68,7 @@ setInterval(Queue, 1000);
 //args[11] - temp stores number of cards (decrements)
 //args[12] - model simple display name
 //args[13] - model backend name
+var cardstomake = 0;
 function Start(message, _in) {
 	lastid = message.author
 	input = " " + _in.join(" ")
@@ -115,6 +116,11 @@ function Start(message, _in) {
 				args[7] = 'nomse'
 				args[6] = 40
 				break;
+			case "legendary":
+				args[9] = "legendary"
+				args[3] = 100
+				cardstomake = 0
+				break;
 				
 			default:
 				message.channel.send(`Switch \`${_switch[0]}\` does not exist, ${message.author}. Creating your cards without this parameter.`)
@@ -134,23 +140,27 @@ function ArgsCheck(message, args) {
 	//fix model to proper term used in backend based on channel command came from
 	if (message.channel.id == '733313821153689622') {
 		args[12] = 'mtg'
-		args[13] = 'model_2020-11-19mtg'
+		args[13] = '2021-07mtg'
 	}
 	else if (message.channel.id == '734244277122760744') {
 		args[12] = 'msem'
-		args[13] = 'model_2020-11-19msem'
+		args[13] = '2021-07msem'
 	}
 	else if (message.channel.id == '779947284262551584') {
 		args[12] = 'mixed'
-		args[13] = 'model_2020-11-21mixed'
+		args[13] = '2021-07mixed'
 	}
-	else if (message.channel.id == '780577138788925460') {
+	else if (message.channel.id == '850935526545424404') {
 		args[12] = 'reminder'
-		args[13] = 'model_2020-11-23reminder'
+		args[13] = '2021-07reminder'
+	}
+	else if (message.channel.id == '878720017317900348') {
+		args[12] = 'randomcost'
+		args[13] = '2021-08randcost'
 	}
 	else {
 		args[12] = 'mtg'
-		args[13] = 'model_2020-11-19mtg'
+		args[13] = '2021-07mtg'
 	}
 	
 	//filter Temp arg
@@ -190,7 +200,7 @@ function ArgsCheck(message, args) {
 	message.channel.send(`Command recieved from the queue from ${message.author} to generate **${args[9]}**.
 	Generating the batch of cards now... Please wait a moment!`).then(function() {
 		if (args[9] == 'pack') {
-			fs.readFile('./format-packwars.txt', 'utf8' , function (err, data) {
+			fs.readFile('/mnt/c/Discord Bot/mtgnet/format-packwars.txt', 'utf8' , function (err, data) {
 				if (err) { }
 				else {
 					seeds = data.split('\r\n')
@@ -199,7 +209,7 @@ function ArgsCheck(message, args) {
 			});
 		}
 		else if (args[9] == 'cube') {
-			fs.readFile('./format-cube.txt', 'utf8' , function (err, data) {
+			fs.readFile('/mnt/c/Discord Bot/mtgnet/format-cube.txt', 'utf8' , function (err, data) {
 				if (err) { }
 				else {
 					seeds = data.split('\r\n')
@@ -208,7 +218,7 @@ function ArgsCheck(message, args) {
 			});
 		}
 		else if (args[9] == 'commander legends') {
-			fs.readFile('./format-commander.txt', 'utf8' , function (err, data) {
+			fs.readFile('/mnt/c/Discord Bot/mtgnet/format-commander.txt', 'utf8' , function (err, data) {
 				if (err) { }
 				else {
 					seeds = data.split('\r\n')
@@ -219,6 +229,15 @@ function ArgsCheck(message, args) {
 		else if (args[9] == 'names') {
 			seeds = ['|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1']
 			CreateSeededCard(message, args, seeds)
+		}
+		else if (args[9] == 'legendary') {
+			fs.readFile('/mnt/c/Discord Bot/mtgnet/1000-creatures.txt', 'utf8' , function (err, data) {
+				if (err) { console.log("1000-creatures failed")}
+				else {
+					seeds = data.split('\r\n')
+					CreateSeededCard(message, args, seeds)
+				}
+			});
 		}
 	});
 }
@@ -231,7 +250,7 @@ function CreateSeededCard(message, args, seeds) {
 	for (q = 0; q < args[3]; q++) {
 		//script takes args in order:
 		//temp, seed, tlevel, primetext, char length
-		exec(`bash ./createpack.sh ${args[1]} ${args[5] + q} ${args[2]} "|${seeds[q]}" ${args[6]} "${args[13]}"`, (err, stdout, stderr) => {
+		exec(`bash ~/mtg-rnn/createpack.sh ${args[1]} ${args[5] + q} ${args[2]} "|${seeds[q]}" ${args[6]} "${args[13]}"`, (err, stdout, stderr) => {
 			if (err) {
 				console.log("card generate error")
 				args[10].push("card generate error")
@@ -240,10 +259,33 @@ function CreateSeededCard(message, args, seeds) {
 			//then sends to next function when all are done
 			//done this way because the `for` loop will finish execution before cards are done generating
 			args[11]++
-			if (args[11] == args[3])
+			console.log(`${args[11]}--${args[5]}`)
+			if (args[11] >= args[3])
 				ReadCards(message, args)
 		});
 	}
+}
+
+function CreateSeededCardSerial(message, args, seeds) {
+	//script takes args in order:
+	//temp, seed, tlevel, primetext, char length
+	exec(`bash ~/mtg-rnn/createpack.sh ${args[1]} ${args[5]} ${args[2]} "|${seeds[cardstomake]}" ${args[6]} "${args[13]}"`, (err, stdout, stderr) => {
+		if (err) {
+			console.log("card generate error")
+			args[10].push("card generate error")
+		}
+		//card generation runs in parallel, so this increments for each card when it finishes
+		//then sends to next function when all are done
+		//done this way because the `for` loop will finish execution before cards are done generating
+		args[11]++
+		args[5] = args[5] + 1
+		cardstomake++
+		console.log(`${cardstomake}--${args[5]}`)
+		if (args[11] >= args[3] || cardstomake >= args[3])
+			ReadCards(message, args)
+		else
+			CreateSeededCardSerial(message, args, seeds)
+	});
 }
 
 
@@ -252,7 +294,7 @@ function CreateSeededCard(message, args, seeds) {
 //generation is different for each.
 function ReadCards(message, args) {
 	//arg input is 'mse'/'nomse'
-	exec(`bash ./prettypack.sh ${args[7]}`, (err, stdout, stderr) => {
+	exec(`bash ~/mtg-rnn/prettypack.sh ${args[7]}`, (err, stdout, stderr) => {
 		Splitcards(message, args)
 	});
 }
@@ -263,10 +305,10 @@ function ReadCards(message, args) {
 function Splitcards(message, args) {
 	var datestr = dateTime().replace(/:/g,'').replace(/ /g,'_');
 	//renames output files to include the date
-	fs.rename('./packpretty.txt', `./${datestr}.txt`, () => {
-	fs.rename('./packpretty.txt.mse-set', `./${datestr}.mse-set`, () => {});
+	fs.rename('/mnt/c/mtg-rnn/packpretty.txt', `/mnt/c/mtg-rnn/${datestr}.txt`, () => {
+	fs.rename('/mnt/c/mtg-rnn/packpretty.txt.mse-set', `/mnt/c/mtg-rnn/${datestr}.mse-set`, () => {});
 	
-	fs.readFile(`./${datestr}.txt`, 'utf8' , function (err, data) {
+	fs.readFile(`/mnt/c/mtg-rnn/${datestr}.txt`, 'utf8' , function (err, data) {
 		//re-enable the queue
 		run = true
 		lastid = ""
@@ -279,7 +321,7 @@ function Splitcards(message, args) {
 			args[10] = data.split('\n\n').slice(0);
 			CardCheckpoint(message, args);
 			//delete the created file. The --names method does not create a .mse-set
-			fs.unlinkSync(`./${datestr}.txt`);
+			fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
 		}
 		else {
 			cardscreated += args[3]
@@ -287,11 +329,11 @@ function Splitcards(message, args) {
 			
 			//attach text file to channel message
 			message.channel.send(`${message.author}, Here is your file!`, {
-				files: [ `./${datestr}.mse-set` ]
+				files: [ `/mnt/c/mtg-rnn/${datestr}.mse-set` ]
 			}).then(function() {
 				//delete the created files
-				fs.unlinkSync(`./${datestr}.mse-set`);
-				fs.unlinkSync(`./${datestr}.txt`);
+				fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.mse-set`);
+				fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
 			});
 		}
 	});
@@ -346,13 +388,13 @@ function Embed_Newcard(message, args, names) {
 function WriteCardsCreated(){
 	var _num
 	//read file
-	fs.readFile('./cardscreated.txt', 'utf8', function (err, data) {
+	fs.readFile('/mnt/c/mtg-rnn/cardscreated.txt', 'utf8', function (err, data) {
 		if (err) { console.log(err)}
 		//parse data to int and add to it
 		_num = parseInt(data)
 		_num += parseInt(cardscreated)
 		//write file
-		fs.writeFile('./cardscreated.txt', _num, 'utf8', function (err, data) {
+		fs.writeFile('/mnt/c/mtg-rnn/cardscreated.txt', _num, 'utf8', function (err, data) {
 			_num = 0
 			cardscreated = 0
 		});

@@ -21,7 +21,7 @@ function Start(message) {
 	//it updates the stored number every time it creates cards.
 	//
 	//read from file and pass it to the output
-	fs.readFile('./cardscreated.txt', 'utf8' , function (err, data) {
+	fs.readFile('/mnt/c/mtg-rnn/cardscreated.txt', 'utf8' , function (err, data) {
 		if (err) { console.log(err)}
 		
 		_num = parseInt(data)
@@ -43,7 +43,10 @@ function Embed_Info(message, cards) {
 		Neural network by billzorn: https://github.com/billzorn/mtg-rnn
 		With help from Nyrt in the official Discord.`},
 		//field - links to stuff
-		{ name: `**Official Links**`, value: `Cocoa's Twitter: https://twitter.com/CocoaMix86 \nMTG Neural Net Discord: https://discord.gg/EH4BTDk`},
+		{ name: `**Official Links**`, value: `Cocoa's Twitter: https://twitter.com/CocoaMix86
+		MTG Neural Net Discord: https://discord.gg/EH4BTDk
+		RoboRosewater_Masters (run by Nyrt): https://twitter.com/RoborosewaterM
+		MtgNeuralWorkshop: https://twitter.com/MtgNeuWorkshop`},
 		//field - Discord bot invite
 		{ name: `**Invite this bot to your server:**`, value: `https://discord.com/oauth2/authorize?client_id=733122248453390374&scope=bot&permissions=89088`}
 	)

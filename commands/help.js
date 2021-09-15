@@ -67,13 +67,6 @@ function Embed_Help(message, data, command, page) {
 		Embed.setFooter(`help page ${page} of ${command.pages.length}`);
 	else
 		Embed.setFooter(`help page 1 of 1`);
-	/*if (data2.length)
-		Embed.addFields({ name: `---\n**__MORE DETAILS:__**`, value: '\u200b' + data2})
-	if (data3.length) {
-		Embed.addFields({ name: `---\n**__SYNTAX HELP:__**`, value: '\u200b' + data3})
-		Embed.addFields({ name: `\u200b`, value: `**--End**
-	If you do not include \`--end\`, the primetext will not be "closed" and the bot will be able to add on to the last field you gave it. If you include \`--end\`, your end field will not be altered. Allowing the bot to edit your last field can be useful if you want to seed on just rules text.`})
-	}*/
 
 	message.channel.send(Embed);
 	}
