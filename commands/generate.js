@@ -140,7 +140,7 @@ function ArgsCheck(message, args) {
 	//fix model to proper term used in backend based on channel command came from
 	if (message.channel.id == '733313821153689622') {
 		args[12] = 'mtg'
-		args[13] = '2021-07mtg'
+		args[13] = '2021-12mtg'
 	}
 	else if (message.channel.id == '734244277122760744') {
 		args[12] = 'msem'
@@ -152,15 +152,19 @@ function ArgsCheck(message, args) {
 	}
 	else if (message.channel.id == '850935526545424404') {
 		args[12] = 'reminder'
-		args[13] = '2021-07reminder'
+		args[13] = '2021-12reminder'
 	}
 	else if (message.channel.id == '878720017317900348') {
 		args[12] = 'randomcost'
-		args[13] = '2021-08randcost'
+		args[13] = '2021-12randcost'
+	}
+	else if (message.channel.id == '890996406087712780') {
+		args[12] = 'everything'
+		args[13] = '2021-12all'
 	}
 	else {
 		args[12] = 'mtg'
-		args[13] = '2021-07mtg'
+		args[13] = '2021-12mtg'
 	}
 	
 	//filter Temp arg

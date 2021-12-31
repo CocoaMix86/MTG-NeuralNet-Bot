@@ -45,8 +45,7 @@ function Embed_Info(message, cards) {
 		//field - links to stuff
 		{ name: `**Official Links**`, value: `Cocoa's Twitter: https://twitter.com/CocoaMix86
 		MTG Neural Net Discord: https://discord.gg/EH4BTDk
-		RoboRosewater_Masters (run by Nyrt): https://twitter.com/RoborosewaterM
-		MtgNeuralWorkshop: https://twitter.com/MtgNeuWorkshop`},
+		RoboRosewater_Masters (run by Nyrt): https://twitter.com/RoborosewaterM`},
 		//field - Discord bot invite
 		{ name: `**Invite this bot to your server:**`, value: `https://discord.com/oauth2/authorize?client_id=733122248453390374&scope=bot&permissions=89088`}
 	)

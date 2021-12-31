@@ -12,6 +12,7 @@ module.exports = {
 	--powertoughness, --pt
 	--rules, --r
 	--rarity, --rr
+	--dfc, --bside
 	--end
 	--seed, --s
 	
@@ -180,13 +181,18 @@ function Start(message, _in) {
 				break;
 			case "rules":
 			case "r":
-				args[0].push(`|9${_switch[1].toUnary().replace('{&','{')}`);
+				args[0].push(`|9${_switch[1].toUnary().replace('{&','{').replace(/\\$/,`\\\\`)}`);
 				args[6].push(400);
 				break;
 			case "rarity":
 			case "rr":
-				args[0].push(`|0${_switch[1]}`);
-				args[6].push(10);
+				args[0].push(`|0${_switch[1].replace('common', 'O').replace('uncommon', 'N').replace('rare', 'A').replace('mythic', 'Y')}`);
+				args[6].push(5);
+				break;
+			case "dfc":
+			case "bside":
+				args[0].push(`|2!`);
+				args[6].push(5);
 				break;
 			case "end":
 			case "e":
@@ -240,7 +246,7 @@ function ArgsCheck(message, args) {
 	//fix model to proper term used in backend based on channel command came from
 	if (message.channel.id == '733313821153689622') {
 		args[12] = 'mtg'
-		args[13] = '2021-07mtg'
+		args[13] = '2021-12mtg'
 	}
 	else if (message.channel.id == '734244277122760744') {
 		args[12] = 'msem'
@@ -252,15 +258,19 @@ function ArgsCheck(message, args) {
 	}
 	else if (message.channel.id == '850935526545424404') {
 		args[12] = 'reminder'
-		args[13] = '2021-07reminder'
+		args[13] = '2021-12reminder'
 	}
 	else if (message.channel.id == '878720017317900348') {
 		args[12] = 'randomcost'
-		args[13] = '2021-08randcost'
+		args[13] = '2021-12randcost'
+	}
+	else if (message.channel.id == '890996406087712780') {
+		args[12] = 'everything'
+		args[13] = '2021-12all'
 	}
 	else {
 		args[12] = 'mtg'
-		args[13] = '2021-08randcost'
+		args[13] = '2021-12randcost'
 	}
 	
 	//filter Temp arg
@@ -317,8 +327,9 @@ function CreateSeededCard(message, args) {
 		exec(`bash ~/mtg-rnn/createmulti.sh ${args[1]} ${args[5] + q} ${args[2]} "${args[0][q % args[0].length]}" 300 "${args[13]}"`, (err, stdout, stderr) => {
 			if (err) {
 				console.log("card generate error")
-				args[10].push("card generate error")
+				//args[10].push("card generate error")
 			}
+			
 			//card generation runs in parallel, so this increments for each card when it finishes
 			//then sends to next function when all are done
 			//done this way because the for loop will finish execution before cards are done generating
@@ -507,13 +518,13 @@ function SplitCardData(inputcard) {
 		if ((card[2].includes("Artifact") && !card[2].includes("Creature")) || card[2].includes("Instant") || card[2].includes("Sorcery") || card[2].includes("Enchantment") || card[2].includes("Land")) {
 			//these cards don't have P/T
 			for (i = 2; i < array.length; i++) {
-				card[4] += array[i].replace(/@/g, card[0]).replace(/uncast/g, "counter").capitalize() + '\n' //TEXT
+				card[4] += array[i].capitalize() + '\n' //TEXT
 			}
 			card[5] = '\u200b'
 		}
 		else {
 			for (i = 2; i < array.length - 1; i++) {
-				card[4] += array[i].replace(/@/g, card[0]).replace(/uncast/g, "counter").capitalize() + '\n' //TEXT
+				card[4] += array[i].capitalize() + '\n' //TEXT
 			}
 			card[5] = array[array.length - 1].replace(')','').replace('(','') //POWER TOUGHNESS
 		}

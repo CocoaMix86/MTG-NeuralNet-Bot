@@ -12,6 +12,7 @@ module.exports = {
 	--powertoughness, --pt
 	--rules, --r
 	--rarity, --rr
+	--dfc, --bside
 	--end
 	--seed, --s
 	
@@ -136,7 +137,7 @@ function Start(message, _in) {
 	//initialize base settings
 	args = ['', 0.86, 70, 1, '', 0, 0, 'nomse',,,,,'mtg']
 	//generate random seed
-	args[5] = RndInteger(1,1000000000000000)
+	args[5] = RndInteger(-1000000000000000,1000000000000000)
 	
 	for (i = 1; i < switches.length; i++) {
 		_switch = switches[i].split(/ (.+)/)
@@ -187,7 +188,11 @@ function Start(message, _in) {
 					break;
 				case "rarity":
 				case "rr":
-					args[0] += `|0${_switch[1]}`;
+					args[0] += `|0${_switch[1].replace('common', 'O').replace('uncommon', 'N').replace('rare', 'A').replace('mythic', 'Y')}`;
+					break;
+				case "dfc":
+				case "bside":
+					args[0] += `|2!`;
 					break;
 				case "end":
 				case "e":
@@ -231,7 +236,8 @@ function Start(message, _in) {
 	}
 	
 	//replace \ with \\ if it appears at the end of the primetext
-	args[0] = args[0].replace(/\\$/,`\\\\`)
+	//also replace $$ with '$$' to not break bash scripts
+	args[0] = args[0].replace(/\\$/,`\\\\`).replace(`$$`, `$\\$`)
 	args[0] += args[4]
 	
 	args[11] = 0
@@ -244,7 +250,7 @@ function ArgsCheck(message, args) {
 	//fix model to proper term used in backend based on channel command came from
 	if (message.channel.id == '733313821153689622') {
 		args[12] = 'mtg'
-		args[13] = '2021-07mtg'
+		args[13] = '2021-12mtg'
 	}
 	else if (message.channel.id == '734244277122760744') {
 		args[12] = 'msem'
@@ -256,15 +262,19 @@ function ArgsCheck(message, args) {
 	}
 	else if (message.channel.id == '850935526545424404') {
 		args[12] = 'reminder'
-		args[13] = '2021-07reminder'
+		args[13] = '2021-12reminder'
 	}
 	else if (message.channel.id == '878720017317900348') {
 		args[12] = 'randomcost'
-		args[13] = '2021-08randcost'
+		args[13] = '2021-12randcost'
+	}
+	else if (message.channel.id == '890996406087712780') {
+		args[12] = 'everything'
+		args[13] = '2021-12all'
 	}
 	else {
 		args[12] = 'mtg'
-		args[13] = '2021-07mtg'
+		args[13] = '2021-12mtg'
 	}
 	
 	//filter Temp arg
@@ -405,7 +415,7 @@ function Splitcards(message, args) {
 			console.log("file read error")
 			/*args[10].push(data)
 			CardCheckpoint(message, args)*/
-			message.channel.send("Failed to read from generated file :( Please try again.")
+			message.channel.send(`seed: ${args[5]}\nFailed to read from generated file :( Please try again.`)
 			run = true
 		}
 		else {
@@ -428,7 +438,7 @@ function Splitcards(message, args) {
 				WriteCardsCreated();
 				
 				//attach text file to channel message
-				message.channel.send(`${message.author}, you requested a text file, or more than 30 cards (${args[3]}), so you get them in raw text!`, {
+				message.channel.send(`${message.author}, you requested a text file, or more than 30 cards (${args[3]}), so you get them in raw text!\nseed: ${args[5]}`, {
 					files: [ `/mnt/c/mtg-rnn/${datestr}.txt` ]
 				}).then(function() {
 						fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
@@ -485,7 +495,7 @@ function SplitCardData(inputcard) {
 	
 		cardtitle = array[0].split(/<(.+)/) //splits cost from name
 	
-		card[0] = cardtitle[0].replace('~', '-').capitalizeWords().slice(0, -1) //NAME
+		card[0] = cardtitle[0]//.replace('~', '-').capitalizeWords().slice(0, -1) //NAME
 		card[1] = "<" + cardtitle[1] //COST
 		card[2] = array[1].toString().replace('~', '—').capitalizeWords() //TYPE
 		
@@ -497,21 +507,28 @@ function SplitCardData(inputcard) {
 		//fill rules text and P/T or loyalty
 		card[4] = ""
 		card[5] = ""
+		card[6] = ""
 		if ((card[2].includes("Artifact") && !card[2].includes("Creature")) || card[2].includes("Instant") || card[2].includes("Sorcery") || card[2].includes("Enchantment") || card[2].includes("Land")) {
 			//these cards don't have P/T
 			for (i = 2; i < array.length; i++) {
-				card[4] += array[i].replace(/@/g, card[0]).replace(/uncast/g, "counter").capitalize() + '\n' //TEXT
+				card[4] += array[i].capitalize() + '\n' //TEXT .replace(/@/g, card[0])
 			}
 			card[5] = '\u200b'
 		}
 		else {
 			for (i = 2; i < array.length - 1; i++) {
-				card[4] += array[i].replace(/@/g, card[0]).replace(/uncast/g, "counter").capitalize() + '\n' //TEXT
+				card[4] += array[i].capitalize() + '\n' //TEXT .replace(/uncast/g, "counter")
 			}
 			card[5] = array[array.length - 1].replace(')','').replace('(','') //POWER TOUGHNESS
 		}
+		//check if card has flavor text
+		if (card[4].includes('$$')) {
+			var rulesplit = card[4].split('$$')
+			card[4] = rulesplit[0]
+			card[6] = `\n-----\n*${rulesplit[1].slice(0, -2)}*\n`
+		}
 		
-		finalcard = `**${card[0]}**  ${card[1]}\n__${card[2]}__\n${card[4]}${card[5]}`
+		finalcard = `**${card[0]}**  ${card[1]}\n__${card[2]}__\n${card[4]}${card[6]}${card[5]}`
 		
 		if (finalcard.length < 1024) {
 			if (true/*CardChecks(card)*/)
@@ -563,9 +580,9 @@ function Embed_Newcard(message, args, cards) {
 			card = cards[j + (k*10)]
 			try {
 				if (card[0].length + card[1].length + 11 > 250)
-					Embed.addFields({ name: `---`, value: `**${card[0]} ${card[1]}${seeded}**\n**${card[2]}**\n${card[4]}${card[5]}`})
+					Embed.addFields({ name: `---`, value: `**${card[0]} ${card[1]}${seeded}**\n**${card[2]}**\n${card[4]}${card[6]}${card[5]}`})
 				else
-					Embed.addFields({ name: `**${card[0]} ${card[1]}${seeded}**`, value: `**${card[2]}**\n${card[4]}${card[5]}`})
+					Embed.addFields({ name: `**${card[0]} ${card[1]}${seeded}**`, value: `**${card[2]}**\n${card[4]}${card[6]}${card[5]}`})
 				cardscreated++
 			} catch (err) {
 				Embed.addFields({name: `-`, value: `This card was malformatted (null data)`})

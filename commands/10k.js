@@ -40,7 +40,7 @@ function Start(message) {
 	message.channel.send("generating cards now. This may take a while...")
 	
 	//initialize base settings
-	args = ['', 0.86, 69, 60, '', 0, 0, 'mse']
+	args = ['', 0.86, 69, 50, '', 0, 0, 'mse']
 
 	//generate random seed
 	args[5] = RndInteger(1,1000000000000000)
@@ -57,14 +57,16 @@ function CreateManyCards(message, args) {
 	//script takes args in order:
 	//temp, seed, tlevel, primetext, char length
 	for (q = 0; q < 100; q++) {
-	exec(`bash ~/mtg-rnn/10k.sh ${args[1]} ${args[5] + q} ${args[2]} "|0" ${args[6]} 2021-08randcost`, (err, stdout, stderr) => {
+	exec(`bash ~/mtg-rnn/10k.sh ${args[1]} ${args[5] + q} ${args[2]} "|0" ${args[6]} 2021-12randcost`, (err, stdout, stderr) => {
 		if (err) {
 			console.log("card generate error")
 		} 
 		else {
 			args[11]++
-			if (args[11] == 100)
+			if (args[11] == 100) {
+				console.log(`[${dateTime()}] 10k - card gen finished`)
 				ReadCards(message, args)
+			}
 		}
 	});
 	}
@@ -91,6 +93,7 @@ function Splitcards(message, args) {
 			message.channel.send("final file was not generated")
 		}
 		else {
+			console.log(`[${dateTime()}] 10k - card prettying finished`)
 			//re-enable the queue
 			run = true
 			lastid = ""
