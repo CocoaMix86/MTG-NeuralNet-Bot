@@ -13,6 +13,7 @@ var0="$1"
 var1="nomse"
 
 if [ "$var0" = "$var1" ]; then
+sed -i 's/\\\\/$$/g' prime_2.txt
 ~/mtgencode/decode.py prime_2.txt /mnt/c/mtg-rnn/primepretty.txt -d
 else
 ~/mtgencode/decode.py prime_2.txt /mnt/c/mtg-rnn/primepretty.txt -d -mse
