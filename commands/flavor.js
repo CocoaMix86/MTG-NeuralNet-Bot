@@ -16,7 +16,8 @@ module.exports = {
 const fs = require("fs")
 const { exec } = require('child_process');
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 
 //Filter inputs
@@ -67,7 +68,7 @@ function Embed_Newcard(message, flavor) {
 		Embed.addFields({ name: `-`, value: _flav[x]})
 	}
 			
-	message.channel.send(Embed);
+	message.channel.send({embeds: [Embed]});
 }
 
 

@@ -1,10 +1,15 @@
 //required dependencies
 const Discord = require('discord.js');
 const config = require('./auth.json');
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 var fs = require('fs'); 
 
 //import commands
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+//const client = new Discord.Client({
+	//partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+    //ws: { intents: ["GUILDS", "GUILD_MESSAGES"] }
+//});
 client.commands = new Discord.Collection();
 const cooldowns = new Discord.Collection();
 
@@ -21,7 +26,10 @@ client.once('ready', () => {
 client.login(config.token);
 
 client.on("ready", () => {
-    client.user.setPresence({ activity: { name: 'mtg!help' }, status: 'online' })
+    client.user.setPresence({
+		activities: [{ name: 'mtg!help', type: "WATCHING" }],
+		status: 'online'
+	})
 })
 
 //
@@ -33,14 +41,23 @@ for (const file of commandFiles) {
 	client.commands.set(command.name, command);
 }
 
-client.on('message', message => {
+client.on('messageCreate', message => {
 	//ignore anything that doesn't start with the prefix and is written by a bot
-	if (!message.content.startsWith(prefix) || message.author.bot) return;
-	
+	if ((!message.content.startsWith(prefix) && !message.content.includes('((')) || message.author.bot || message.member.user == null || message == null) return;
 	//Separate arguements from main command
-	const args = message.content.slice(prefix.length).split(' ');
-	const commandName = args.shift().toLowerCase();
+	const args = message.content.slice(prefix.length).replace('`', '').replace(';', '').replace('#', '').replace('?', '').replace('<', '').replace('>', '').replace('|', '').replace('—', '--').replace('"', '\\"').split(' ');
 	
+	var cardlookups = message.content.split('((')
+	if (cardlookups.length > 1) {
+		const command = client.commands.get('lookup')
+		for (x = 1; x < cardlookups.length; x += 1) {
+			if (cardlookups[x].includes('))'))
+				command.execute(message, cardlookups[x].split('))')[0]);
+		}
+		return;
+	}
+	
+	const commandName = args.shift().toLowerCase();
 	const command = client.commands.get(commandName)
 		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 	if (!command) return;
@@ -61,7 +78,10 @@ client.on('message', message => {
 
 		if (now < expirationTime) {
 			const timeLeft = (expirationTime - now) / 1000;
-			return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+			return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`).then(msg =>{
+				setTimeout(() => msg.delete(), timeLeft*1000)
+				//setTimeout(() => message.delete(), timeLeft*1000)
+			});
 		}
 	}
 	timestamps.set(message.author.id, now);
@@ -72,6 +92,5 @@ client.on('message', message => {
 	//run command
 	try {
 		command.execute(message, args);
-	} catch (error) { }
-	
+	} catch (error) { console.log(error) }
 });

@@ -5,22 +5,24 @@ module.exports = {
 	aliases: ['h'],
 	cooldown: 0.01,
 	execute(message, args) {
-		const data = [];
+		var data = "";
 		const { commands } = message.client;
 		const Embed = new Discord.MessageEmbed()
 
 		if (!args.length) {
-			data.push(`**COMMAND LIST:**
-• mtg!create - *creates cards*
-• mtg!draft - *subscribe to draft event notifications*
-• mtg!flavor - *create flavor text with a markov bot*
-• mtg!generate - *create mse file of presets, like a pack or cube*
-• mtg!help - *shows this info*
-• mtg!info - *provides stats and helpful links regarding this bot*
+			data = `**COMMAND LIST:**
+• mtg! [create] - *creates cards, expanding on the last field given*
+• mtg! [multi] - *creates cards, expanding on multiple fields*
+• mtg! [flavor] - *create flavor text with a markov bot*
+• mtg! [generate] - *create mse file of presets, like a pack or cube*
+• mtg! [help] - *shows this info*
+• mtg! [info] - *provides stats and helpful links regarding this bot*
 			
-Use \`${prefix}help [command name] [page #]\` to get info on a specific command.`);
+Use \`${prefix}help [command name] [page #]\` to get info on a specific command.`;
 
-			return message.channel.send(data, { split: true })
+			return message.channel.send({
+				content: data
+			});
 		}
 		
 		const name = args[0].toLowerCase();
@@ -36,14 +38,14 @@ Use \`${prefix}help [command name] [page #]\` to get info on a specific command.
 			return message.channel.send(`"**!${command}**" does not exist.`);
 		}
 		//gather command's data into a single array
-		data.push(`**Command:** \`${prefix}${command.name}\``);
-		if (command.aliases) data.push(`**Aliases:** \`mtg!${command.aliases.join(`\`, \`mtg!`)}\``);
-		if (command.description) data.push(`**Description:** ${command.description}`);
-		if (command.usage) data.push(`**Usage:** \`${prefix}${command.name} ${command.usage}\``);
+		data += `**Command:** \`${prefix}${command.name}\``;
+		if (command.aliases) data += `\n**Aliases:** \`mtg!${command.aliases.join(`\`, \`mtg!`)}\``;
+		if (command.description) data += `\n**Description:** ${command.description}`;
+		if (command.usage) data += `\n**Usage:** \`${prefix}${command.name} ${command.usage}\``;
 		//if command has extra "pages", tack that onto the end
 		if (command.pages) {
 			if (page > command.pages.length || page < 1) page = 1;
-			data.push(`\n**Details:**\n==============================\n${command.pages[page-1]}`);
+			data += `\n**Details:**\n==============================\n${command.pages[page-1]}`;
 		}
 
 		Embed_Help(message, data, command, page);
@@ -51,7 +53,8 @@ Use \`${prefix}help [command name] [page #]\` to get info on a specific command.
 };
 
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 var prefix = 'mtg!'
 
 
@@ -64,11 +67,11 @@ function Embed_Help(message, data, command, page) {
 		.addFields({ name: `Command Help`, value: data})
 		
 	if (command.pages)
-		Embed.setFooter(`help page ${page} of ${command.pages.length}`);
+		Embed.setFooter({ text: `help page ${page} of ${command.pages.length}` });
 	else
-		Embed.setFooter(`help page 1 of 1`);
+		Embed.setFooter({ text: `help page 1 of 1` });
 
-	message.channel.send(Embed);
+	message.channel.send({ embeds: [Embed] });
 	}
 	catch (err) {console.log(err)}
 }

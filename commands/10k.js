@@ -20,7 +20,9 @@ module.exports = {
 const fs = require("fs")
 const { exec } = require('child_process');
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const { RndInteger, capitalize, replaceManaSymbols, dateTime, toUnary } = require('../functions.js');
 
 //Filter inputs
 //args[0] - seed/primetext
@@ -40,7 +42,7 @@ function Start(message) {
 	message.channel.send("generating cards now. This may take a while...")
 	
 	//initialize base settings
-	args = ['', 0.86, 69, 50, '', 0, 0, 'mse']
+	args = ['', 1.1, 69, 20, '', 0, 0, 'mse']
 
 	//generate random seed
 	args[5] = RndInteger(1,1000000000000000)
@@ -57,7 +59,7 @@ function CreateManyCards(message, args) {
 	//script takes args in order:
 	//temp, seed, tlevel, primetext, char length
 	for (q = 0; q < 100; q++) {
-	exec(`bash ~/mtg-rnn/10k.sh ${args[1]} ${args[5] + q} ${args[2]} "|0" ${args[6]} 2021-12randcost`, (err, stdout, stderr) => {
+	exec(`bash ~/mtg-rnn/10k.sh ${args[1]} ${args[5] + q} ${args[2]} "|0" ${args[6]} 2022-05mtg`, (err, stdout, stderr) => {
 		if (err) {
 			console.log("card generate error")
 		} 
@@ -109,22 +111,4 @@ function Splitcards(message, args) {
 				});
 		}
 	});
-}
-
-
-//
-//Various utility functions
-//
-function RndInteger(min, max) {
-  return Math.floor(Math.random() * (max - min) ) + min;
-}
-
-function dateTime() {
-	//get time info for logging
-	var today = new Date();
-	var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-	var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-	var dateTime = date+' '+time;
-	
-	return dateTime
 }

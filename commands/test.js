@@ -1,60 +1,10 @@
 module.exports = {
-	name: 'create',
+	name: 'test',
 	description: 'Used to create a single card from the network.',
 	usage: '[--switch name 1] [--switch name 2] [--switch name 3] ...',
-	pages: [`**Seeded Switches:**
-	--name, --n
-	--cost, --c
-	--supertype, --sp
-	--type, --t
-	--subtype, --sb
-	--loyalty, --l
-	--powertoughness, --pt
-	--rules, --r
-	--rarity, --rr
-	--end
-	--seed, --s
-	
-	**Normal Switches:**
-	--temp   *<- this is temperature*
-	--tlevel [1-70]  *<- this is training level*
-	--cards [1-50]
-	--text   *<- outputs cards in a .txt file*
-	--mse   *<- outputs cards in a file usable with MSE*
-	--length *<- amount of characters to generate. Useful for longer cards like planeswalkers*
-	--model *<- different generation models. Accepts \`mtg\` \`msem\` \`mixed\` \`reminder\` \`everything\`. Default \`mtg\`*
-	
-	**If no seeded switches are set, the bot generates a random card.**`,
-	
-	`All switches accept multiple names, separated by spaces. Examples below:
-	\`--sp legendary snow\`
-	\`--type enchantment creature\`
-	\`--sb bird ape wizard\`
-	\`--name glorious destruction\`
-	
-	**Example:** \`mtg!create --type artifact --temp 1.1\`
-	This will generate an artifact card, using Temperature 1.1
-	
-	**Example:** \`mtg!create --t creature --sp legendary --sb bird wizard\`
-	This will generate a Legendary Creature - Bird Wizard, using the default temperature and training level`,
-	
-	`**Mana Costs**
-	-Mana symbols are *"double charatcer encoded"*. A <:U_:734751083230134282> is represented by **__UU__**. <:UR:734751095381033091> is **__UR__**
-	-Same goes for <:X_:734751108035117136>, energy, snow, etc.
-	-seeding \`--cost\` requires just the mana symbols and numbers.
-	-seeding \`--rules\` requires mana symbols to be wrapped in { }. Example: {UR}{BP}{14}
-	
-	**Text Syntax**
-	ALL TEXT MUST BE LOWERCASE (exceptions are mana costs and other symbols)
-	-seeding \`--rules\` has special requirements. To include a newline on the card, use a single \`\\\`. Example: \`--r flash\\flying\\whenever this creature...\`
-	-"X" should be uppercase when not referencing a cost.
-	-Tap and Untap are T and Q (not wrapped in brackets)`,
-	
-	`**--End**
-	If you do not include \`--end\`, the primetext will not be "closed" and the bot will be able to add on to the last field you gave it. If you include \`--end\`, your end field will not be altered. Allowing the bot to edit your last field can be useful if you want to seed on just **rules text** or **cost**.`],
-	
-	aliases: ['c', 'cards'],
-	cooldown: 5,
+	pages: [" "],
+	aliases: ['t'],
+	cooldown: 1,
 	
 	execute(message, args) {
 		//test for --queue switch. If found, reply with what's queued. Do not generate a card
@@ -74,7 +24,7 @@ module.exports = {
 		//if user has a job running, don't accept another one.
 		//else if (message.author == lastid)
 			//message.channel.send("You already have a running job! Please wait until it finished.")
-		else if (GenerationChannel(message) == true) {
+		else {
 			//send message if queue is backed up or a job is running
 			if (commandqueuemany.length > 0 || run == false) {
 				message.channel.send(`Your request for a card was received. There are currently ${commandqueuemany.length} card jobs in the queue, or a job is currently running. Please wait a moment!`)
@@ -85,14 +35,14 @@ module.exports = {
 	},
 };
 
-const fs = require('fs')
+const fs = require("fs")
 const { exec } = require('child_process');
 const Discord = require('discord.js');
+const { MessageAttachment, MessageEmbed } = require('discord.js');
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const { RndInteger, capitalize, replaceManaSymbols, dateTime, toUnary, WriteCardsCreated, GenerationChannel } = require('../functions.js');
-const { CardCheckpoint } = require('../cardposting.js');
+const { RndInteger, capitalize, replaceManaSymbols, dateTime, toUnary, WriteCardsCreated } = require('../functions.js');
 
 var _switchSet = ["name", "n", "cost", "c", "supertype", "sp", "subtype", "sb", "type", "t", "loyalty", "l", "powertoughness", "pt", "rules", "r", "rarity", "rr", "end", "end", "seed", "s"];
 
@@ -123,13 +73,14 @@ setInterval(Queue, 1000);
 //args[4] - contains priming end character, if specified
 //args[5] - number seed
 //args[6] - chars to generate
-//args[7] - switch for mse
-//args[8] - switch for raw file output
+//args[7] - switch for images
+//args[8] - switch for file type
 //args[9] - [[unused]] - !generate uses this field
 //args[10] - stores generated cards
 //args[11] - temp stores number of cards (decrements)
 //args[12] - model name
 //args[13] - 
+//args[14] - date string
 function Start(message, _in) {
 	lastid = message.author
 	input = " " + _in.join(" ")
@@ -139,7 +90,7 @@ function Start(message, _in) {
 	var _costopen = false;
 	
 	//initialize base settings
-	args = ['', 0.86, 70, 1, '', 0, 0, 'nomse',,,,,'']
+	args = ['', 0.86, 70, 1, '', 0, 0, true, 'mse',,,,'']
 	//generate random seed
 	args[5] = RndInteger(-1000000000000000,1000000000000000)
 	
@@ -186,7 +137,7 @@ function Start(message, _in) {
 				break;
 			case "rules":
 			case "r":
-				args[0] += `|9${_switch[1].toUnary().replace('{&','{')}`;
+				args[0] += `|9${_switch[1].substring(0, 100).toUnary().replace('{&','{')}`;
 				break;
 			case "rarity":
 			case "rr":
@@ -196,13 +147,12 @@ function Start(message, _in) {
 			case "e":
 				args[4] += `|`;
 				break;
-			
-			case "text":
-				args[8] = true;
+				
+			case "file":
+				args[8] = _switch[1];
 				break;
-			case "mse":
-				args[8] = true;
-				args[7] = 'mse';
+			case "noimages":
+				args[7] = false;
 				break;
 			case "seed":
 			case "s":
@@ -212,7 +162,7 @@ function Start(message, _in) {
 			case "m":
 				args[12] = _switch[1]
 				break;
-				
+			
 			case "temp":
 				args[1] = _switch[1].replace(/,/g, ' ')
 				break;
@@ -227,20 +177,19 @@ function Start(message, _in) {
 				break;
 				
 			default:
-				try {
 				message.reply(`Switch \`${_switch[0]}\` does not exist. Creating your cards without this parameter.`).then(msg => {
 					setTimeout(() => msg.delete(), 10000)
 				});
-				} catch (err) {console.log(err)}
-			}
-		} catch (err) {console.log(err) }
+				}
+			} catch (err) {console.log(err) }
 	}
-	console.log(args[0])
+	
 	//replace \ with \\ if it appears at the end of the primetext
 	//also replace $$ with '$$' to not break bash scripts
 	args[0] = args[0].replace(/\\$/,`\\\\`).replace('$$', '77').replace('$', '').replace(`77`, `$\\$ `)
-	//args[0] = args[0].substring(0, 300)
+	args[0] = args[0].substring(0, 100)
 	args[0] += args[4]
+	
 	args[11] = 0
 	
 	ArgsCheck(message, args)
@@ -267,25 +216,30 @@ function ArgsCheck(message, args) {
 	
 	//filter Temp arg
 	if (isNaN(args[1])) {
+		//message.channel.send(`**TEMPERATURE** input was not a number. Received: ${args[2]}. Automatically set to 0.8.`)
 		args[1] = 0.8
 	}
 	
 	//filter TLevel arg
 	if (isNaN(args[2])) {
+		//message.channel.send(`**TRAINING LEVEL** input was not a number. Received: ${args[3]}. Automatically set to 70.`)
 		args[2] = 70
 	}
 	if (args[2] < 1 || args[2] > 70) {
+		//message.channel.send(`**TRAINING LEVEL** input was outside the range of 1 and 70. Received: ${args[2]}. Automatically set to 70.`)
 		args[2] = 70
 	}
 	args[2] = args[2] - 1//sub 1 because array is 0-69.
 	
 	//filter "amount of cards" arg
 	if (isNaN(args[3]))
-		args[3] = 3
-	if (args[3] > 30)//if more than 30 cards, set text flag
-		args[8] = true
-	if (args[3] > 100)//cap cards at 100
-		args[3] = 100
+		args[3] = 1
+	if (args[3] > 10) {//if more than 30 cards, set text flag
+		args[7] = false
+		args[8] = 'text'
+	}
+	if (args[3] > 10)//cap cards at 100
+		args[3] = 10
 	else if (args[3] < 1)//minimum is 1 card
 		args[3] = 1
 	
@@ -302,6 +256,10 @@ function ArgsCheck(message, args) {
 			args[6] = (250 * args[3])
 	}
 	
+	//check args[8] file type
+	if (args[8] != 'text' && args[8] != 'txt' && args[8] != 'mse')
+		args[8] = 'text'
+	
 	//initialize array at 10 to store cards in
 	args[10] = []
 	
@@ -311,10 +269,10 @@ function ArgsCheck(message, args) {
 	exec(`rm /mnt/c/mtg-rnn/primepretty.txt; rm ~/mtg-rnn/prime2.txt;`, (err, stdout, stderr) => {})
 	
 	//some logging
-	console.log(`[${dateTime()}] Create - ${message.guild.name}/${message.member.user.tag} requested ${args[3]} cards.`)
-	console.log(`[${dateTime()}] Create - Using: TEMP:${args[1]}, LEVEL:${args[2]}.`)
+	console.log(`[${dateTime()}] Test - ${message.guild.name}/${message.member.user.tag} requested ${args[3]} cards.`)
+	console.log(`[${dateTime()}] Test - Using: TEMP:${args[1]}, LEVEL:${args[2]}.`)
 	
-	message.reply(`Your command has been received from the queue to generate ${args[3]} cards.
+	message.channel.send(`Your command has been recieved from the queue to generate ${args[3]} cards.
 	Generating the batch of cards now... Please wait a moment!`).then(msg => {
 		//switch between single seeded cards, or mass creation.
 		//based on if primetext is empty or not
@@ -322,9 +280,7 @@ function ArgsCheck(message, args) {
 			CreateSeededCard(message, args)
 		else
 			CreateManyCards(message, args)
-		try {
-			setTimeout(() => msg.delete(), 10000)
-		} catch (err) {}
+		setTimeout(() => msg.delete(), 10000)
 	});
 }
 
@@ -375,15 +331,23 @@ function CreateManyCards(message, args) {
 //Runs a different bash script depending if input was seeded or not, as file
 //generation is different for each.
 function ReadCards(message, args) {
+	//save the date string
+	args[14] = dateTime().replace(/:/g,'').replace(/ /g,'_');
 	if (args[0] != '') {
 		//arg input is MSE (true/false)
-		exec(`bash ~/mtg-rnn/prettycards.sh ${args[7]}`, (err, stdout, stderr) => {
+		exec(`bash ~/mtg-rnn/testcards.sh ${args[8]}`, (err, stdout, stderr) => {
+			fs.rename('/mnt/c/mtg-rnn/primepretty.txt', `/mnt/c/mtg-rnn/${args[14]}.txt`, () => {
+				fs.rename('/mnt/c/mtg-rnn/primepretty.txt.mse-set', `/mnt/c/mtg-rnn/${args[14]}.mse-set`, () => {});
+			});
 			Splitcards(message, args)
 		});
 	}
 	else {
 		//arg input is MSE (true/false)
-		exec(`bash ~/mtg-rnn/prettymany.sh ${args[7]}`, (err, stdout, stderr) => {
+		exec(`bash ~/mtg-rnn/testmany.sh ${args[8]}`, (err, stdout, stderr) => {
+			fs.rename('/mnt/c/mtg-rnn/primepretty.txt', `/mnt/c/mtg-rnn/${args[14]}.txt`, () => {
+				fs.rename('/mnt/c/mtg-rnn/primepretty.txt.mse-set', `/mnt/c/mtg-rnn/${args[14]}.mse-set`, () => {});
+			});
 			Splitcards(message, args)
 		});
 	}
@@ -393,32 +357,20 @@ function ReadCards(message, args) {
 //Takes the prettied cards and splits them into an array for processing.
 //Also takes care of file attachments if requested.
 function Splitcards(message, args) {
-	var datestr = dateTime().replace(/:/g,'').replace(/ /g,'_');
-	fs.rename('/mnt/c/mtg-rnn/primepretty.txt', `/mnt/c/mtg-rnn/${datestr}.txt`, () => {
-	fs.rename('/mnt/c/mtg-rnn/primepretty.txt.mse-set', `/mnt/c/mtg-rnn/${datestr}.mse-set`, () => {});
-	
-	fs.readFile(`/mnt/c/mtg-rnn/${datestr}.txt`, 'utf8' , function (err, data) {
-		if (err) {
-			console.log("file read error")
-			/*args[10].push(data)
-			CardCheckpoint(message, args)*/
-			message.channel.send(`seed: ${args[5]}\nFailed to read from generated file :( Please try again.`)
-			lastid = ""
-			run = true
-		}
+	exec(`bash ~/mtg-rnn/mse-cli.sh ${args[14]}`, (err, stdout, stderr) => {
+		if (err)
+			console.log(err)
 		else {
+			Embed_CardImage(message, args)
 			//test if user specified if they want a text file or not
 			//true is text file
 			//If text=false, bot needs to process the cards and output embeds
-			if (!args[8]) {
+			if (args[8] == false) {
 				//split cards into an array for easier processing
 				args[10] = data.split('\n\n').slice(0);
 				CardCheckpoint(message, args)
 				//delete the file now that we're done with it
-				fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
-				//re-enable the queue
-				run = true
-				lastid = ""
+				fs.unlinkSync(`/mnt/c/mtg-rnn/${args[14]}.txt`);
 			}
 			//if text=true, bot has less processing to do
 			else {
@@ -428,29 +380,177 @@ function Splitcards(message, args) {
 				WriteCardsCreated(args[3]);
 				
 				//attach text file to channel message
+				//message.channel.send(`${message.author}, you requested a text file, or more than 30 cards (${args[3]}), so you get them in raw text!\nseed: ${args[5]}`, {
+					//files: [ `/mnt/c/mtg-rnn/${args[14]}.txt` ]
+				//}).then(function() {
+						//fs.unlinkSync(`/mnt/c/mtg-rnn/${args[14]}.txt`);
+					//});
 				//also send MSE file if requested
 				if (args[7] == 'mse') {
-					try {
-						message.channel.send({
-							content: `${message.author}, you requested an MSE file.`,
-							files: [`/mnt/c/mtg-rnn/${datestr}.mse-set`]
-						}).then(function() {
-							fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.mse-set`);
-							fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
-						});
-					}
-					catch (err) { }
-				}
-				else {
 					message.channel.send({
-						content: `${message.author}, you requested a text file, or more than 30 cards (${args[3]}), so you get them in raw text!\nseed: ${args[5]}`,
-						files: [`/mnt/c/mtg-rnn/${datestr}.txt`]
+						content: `an mse file for you`,
+						files: [ `/mnt/c/mtg-rnn/${args[14]}.mse-set` ]
 					}).then(function() {
-						fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
+						fs.unlinkSync(`/mnt/c/mtg-rnn/${args[14]}.mse-set`);
 					});
 				}
 			}
 		}
 	});
-	});
+}
+
+function Embed_CardImage(message, args) {
+	var seeded = args[0].length > 2 ? ' - *seeded*' : ''
+	var cardscreated = 0
+	
+	const Embed = new MessageEmbed()
+		.setColor('#009900')
+		.setDescription(`requested by ${message.author}\nTemperature: ${args[1]}, Training Level: ${args[2] + 1}, Model: ${args[12]}, Seed: ${args[5]}`)
+		.setFooter(`This is an advanced command! See \`mtg!help create\``)
+	message.channel.send({ embeds: [Embed] });
+
+	for (k = 1; k <= args[3]; k++) {
+		var imagepath = `./cli${k.toString().padStart(3, '0')}.png`
+		var text = fs.readFileSync(`./cli${k.toString().padStart(3, '0')}.txt`, 'utf8').replaceManaSymbols().split('\n');
+		
+		const embed = {
+			"title": `${text[0]}`,
+			"color": 0x009900,
+			"thumbnail": {
+				"url": "attachment://card.png"
+			},
+			"fields": [
+			{
+				"name": `${text[1]}`,
+				"value": `${text.slice(2).join('\n')}`,
+				"inline": false
+			},
+			]
+		};
+		cardscreated++
+		message.channel.send({
+			embeds: [embed],
+			files: [{attachment:`${imagepath}`, name:'card.png'}]
+		});
+	}
+	
+	WriteCardsCreated(cardscreated);
+}
+
+//A middle point of functions. This is where finished cards are collected to
+//finally be processed.
+function CardCheckpoint(message, args) {
+	//re-enabled queue at this point
+	run = true
+	lastid = ""
+	
+	var _separate = []
+
+	for (ii = 0; ii < args[10].length; ii++) {
+		_separate[ii] = SplitCardData(args[10][ii])
+	}
+	
+	Embed_Newcard(message, args, _separate)
+}
+
+
+//Takes raw input of a card and creates an array containing separated data of the card,
+//such as name, type, rules, etc...
+function SplitCardData(inputcard) {
+	try {
+		_array = inputcard.replace("_NOCOST_", "{0}").replaceManaSymbols().replace("_INVALID_",'').split('\n')
+		//this removes empty lines
+		array = _array.filter(function (el) {
+			if (el.length > 0) return el;
+		});
+		var card = []
+		
+		//At this point I have each line of a card separated into an array.
+		//Now it gets processed further, to separate things in lines, like name and cost,
+		//and combine the multiple array indexes of rules text into one index.
+		//Not entirely necessary, but I do it so I can add some text formatting when outputting.
+		//It's quite quick too, so it's not a big deal.
+		// --- it looks like a lot, but it's mainly just text manipulation
+	
+		cardtitle = array[0].split(/<(.+)/) //splits cost from name
+	
+		card[0] = cardtitle[0]//.replace('~', '-') //NAME
+		card[1] = "<" + cardtitle[1] //COST
+		card[2] = array[1].toString().replace('~', '—') //TYPE
+		
+		//add planeswalker's name to the card title
+		/*if (card[2].includes('Planeswalker')) {
+			card[0] = card[2].split('—')[1].split('(')[0].substring(1).slice(0, -1) + ", " + card[0]
+		}*/
+		
+		//fill rules text and P/T or loyalty
+		card[4] = ""
+		card[5] = ""
+		card[6] = ""
+		if ((card[2].includes("Artifact") && !card[2].includes("Creature")) || card[2].includes("Instant") || card[2].includes("Sorcery") || card[2].includes("Enchantment") || card[2].includes("Land")) {
+			//these cards don't have P/T
+			for (i = 2; i < array.length; i++) {
+				card[4] += array[i].capitalize() + '\n' //TEXT .replace(/@/g, card[0])
+			}
+			card[5] = '\u200b'
+		}
+		else {
+			for (i = 2; i < array.length - 1; i++) {
+				card[4] += array[i].capitalize() + '\n' //TEXT .replace(/uncast/g, "counter")
+			}
+			card[5] = array[array.length - 1].replace(')','').replace('(','') //POWER TOUGHNESS
+		}
+		//check if card has flavor text
+		if (card[4].includes('$$')) {
+			var rulesplit = card[4].split('$$')
+			card[4] = rulesplit[0]
+			card[6] = `\n-----\n*${rulesplit[1].slice(0, -2)}*\n`
+		}
+		
+		finalcard = `**${card[0]}**  ${card[1]}\n__${card[2]}__\n${card[4]}${card[6]}${card[5]}`
+		
+		if (finalcard.length < 1024) {
+			if (true/*CardChecks(card)*/)
+				return card
+			else
+				return ['This card was malformatted (card final checks fail)','-','-','-','-','-']
+		}
+		else
+			return ['This card was malformatted (too long)','-','-','-','-','-']
+	}
+	catch (err) {
+		return ['This card was malformatted (data split error)','-','-','-','-','-']
+	} 
+}
+
+
+function Embed_Newcard(message, args, cards) {
+	var seeded = args[0].length > 2 ? ' - *seeded*' : ''
+	var cardscreated = 0
+	
+	for (k = 0; (k*10) < args[3]; k++) {
+		const Embed = new Discord.MessageEmbed()
+		.setColor('#009900')
+		.setDescription(`requested by ${message.author}\nTemperature: ${args[1]}, Training Level: ${args[2] + 1}, Model: ${args[12]}, Seed: ${args[5]}`)
+		.setFooter({ text: `This is an advanced command! See \`mtg!help create\`` })
+		
+		for (j = 0; j < 10; j++) {
+			card = cards[j + (k*10)]
+			try {
+				if (card[0].length + card[1].length + 11 > 250)
+					Embed.addFields({ name: `---`, value: `**${card[0]} ${card[1]}${seeded}**\n**${card[2]}**\n${card[4]}${card[6]}${card[5]}`})
+				else
+					Embed.addFields({ name: `**${card[0]} ${card[1]}${seeded}**`, value: `**${card[2]}**\n${card[4]}${card[6]}${card[5]}`})
+				cardscreated++
+			} catch (err) {
+				Embed.addFields({name: `-`, value: `This card was malformatted (null data)`})
+			}
+			
+			if (j + (k*10) >= args[3] - 1)
+				break
+		}
+		
+		message.channel.send({embeds: [Embed]});
+	}
+	WriteCardsCreated(cardscreated)
 }

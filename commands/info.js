@@ -11,7 +11,8 @@ module.exports = {
 
 const fs = require("fs")
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 
 function Start(message) {
@@ -50,5 +51,5 @@ function Embed_Info(message, cards) {
 		{ name: `**Invite this bot to your server:**`, value: `https://discord.com/oauth2/authorize?client_id=733122248453390374&scope=bot&permissions=89088`}
 	)
 
-	message.channel.send(Embed);
+	message.channel.send({ embeds: [Embed] });
 }

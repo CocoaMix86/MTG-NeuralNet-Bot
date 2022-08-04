@@ -20,7 +20,7 @@ module.exports = {
 		//if user has a job running, don't accept another one.
 		if (message.author == lastid)
 			message.channel.send("You already have a running job! Please wait until it finished.")
-		else {
+		else if (GenerationChannel(message) == true) {
 			//add incoming command to the queue
 			commandqueuemany.push([message, args])
 			//send message if queue is backed up or a job is running
@@ -34,7 +34,10 @@ module.exports = {
 const fs = require("fs")
 const { exec } = require('child_process');
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, Intents } = require('discord.js');
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+
+const { RndInteger, capitalize, replaceManaSymbols, dateTime, toUnary, WriteCardsCreated, GenerationChannel } = require('../functions.js');
 
 
 //queues incoming commands and executes the next one as soon as the previous one is done running
@@ -66,8 +69,8 @@ setInterval(Queue, 1000);
 //args[9] - format
 //args[10] - stores generated cards
 //args[11] - temp stores number of cards (decrements)
-//args[12] - model simple display name
-//args[13] - model backend name
+//args[12] - model name
+//args[13] - 
 var cardstomake = 0;
 function Start(message, _in) {
 	lastid = message.author
@@ -77,7 +80,7 @@ function Start(message, _in) {
 	var _costopen = false;
 	
 	//initialize base settings
-	args = ['blah', 0.8, 70, 15, '', 0, 500, 'mse', 'text', 'pack']
+	args = ['blah', 0.8, 70, 15, '', 0, 500, 'mse', 'text', 'pack',,,'']
 	
 	for (i = 1; i < switches.length; i++) {
 		_switch = switches[i].split(/ (.+)/)
@@ -95,6 +98,9 @@ function Start(message, _in) {
 			case "length":
 				args[6] = _switch[1]
 				break;
+			case "model":
+			case "m":
+				args[12] = _switch[1]
 				
 			case "pack":
 				args[9] = "pack"
@@ -103,6 +109,10 @@ function Start(message, _in) {
 			case "cube":
 				args[9] = "cube"
 				args[3] = 360
+				break;
+			case "minicube":
+				args[9] = "minicube"
+				args[3] = 120
 				break;
 			case "commander":
 			case "commanderlegends":
@@ -118,12 +128,14 @@ function Start(message, _in) {
 				break;
 			case "legendary":
 				args[9] = "legendary"
-				args[3] = 100
+				args[3] = 1000
 				cardstomake = 0
 				break;
 				
 			default:
-				message.channel.send(`Switch \`${_switch[0]}\` does not exist, ${message.author}. Creating your cards without this parameter.`)
+				message.reply(`Switch \`${_switch[0]}\` does not exist. Creating your cards without this parameter.`).then(msg => {
+					setTimeout(() => msg.delete(), 10000)
+				});
 			}
 		} catch (err) {console.log(err) }
 	}
@@ -138,33 +150,20 @@ function Start(message, _in) {
 
 function ArgsCheck(message, args) {
 	//fix model to proper term used in backend based on channel command came from
-	if (message.channel.id == '733313821153689622') {
+	if (args[12] != 'mtg' && args[12] != 'msem' && args[12] != 'mixed' && args[12] != 'reminder' && args[12] != 'everything' && args[12] != '') {
 		args[12] = 'mtg'
-		args[13] = '2021-12mtg'
 	}
-	else if (message.channel.id == '734244277122760744') {
-		args[12] = 'msem'
-		args[13] = '2021-07msem'
-	}
-	else if (message.channel.id == '779947284262551584') {
-		args[12] = 'mixed'
-		args[13] = '2021-07mixed'
-	}
-	else if (message.channel.id == '850935526545424404') {
-		args[12] = 'reminder'
-		args[13] = '2021-12reminder'
-	}
-	else if (message.channel.id == '878720017317900348') {
-		args[12] = 'randomcost'
-		args[13] = '2021-12randcost'
-	}
-	else if (message.channel.id == '890996406087712780') {
-		args[12] = 'everything'
-		args[13] = '2021-12all'
-	}
-	else {
-		args[12] = 'mtg'
-		args[13] = '2021-12mtg'
+	else if (args[12] == '') {
+		if (message.channel.id == '734244277122760744')
+			args[12] = 'msem'
+		else if (message.channel.id == '779947284262551584')
+			args[12] = 'mixed'
+		else if (message.channel.id == '850935526545424404')
+			args[12] = 'reminder'
+		else if (message.channel.id == '890996406087712780')
+			args[12] = 'everything'
+		else
+			args[12] = 'mtg'
 	}
 	
 	//filter Temp arg
@@ -201,8 +200,9 @@ function ArgsCheck(message, args) {
 	console.log(`[${dateTime()}] Generate - ${message.guild.name}/${message.member.user.tag} requested ${args[9]}.`)
 	console.log(`[${dateTime()}] Generate - Using: TEMP:${args[1]}, LEVEL:${args[2]}.`)
 	
-	message.channel.send(`Command recieved from the queue from ${message.author} to generate **${args[9]}**.
-	Generating the batch of cards now... Please wait a moment!`).then(function() {
+	message.reply(`Your command has been received from the queue to generate **${args[9]}**.
+	Generating the batch of cards now... Please wait a moment!`).then(msg => {
+		setTimeout(() => msg.delete(), 10000)
 		if (args[9] == 'pack') {
 			fs.readFile('/mnt/c/Discord Bot/mtgnet/format-packwars.txt', 'utf8' , function (err, data) {
 				if (err) { }
@@ -221,6 +221,15 @@ function ArgsCheck(message, args) {
 				}
 			});
 		}
+		else if (args[9] == 'minicube') {
+			fs.readFile('/mnt/c/Discord Bot/mtgnet/format-minicube.txt', 'utf8' , function (err, data) {
+				if (err) { }
+				else {
+					seeds = data.split('\r\n')
+					CreateSeededCard(message, args, seeds)
+				}
+			});
+		}
 		else if (args[9] == 'commander legends') {
 			fs.readFile('/mnt/c/Discord Bot/mtgnet/format-commander.txt', 'utf8' , function (err, data) {
 				if (err) { }
@@ -231,7 +240,7 @@ function ArgsCheck(message, args) {
 			});
 		}
 		else if (args[9] == 'names') {
-			seeds = ['|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1','|9|1']
+			seeds = ['|9|8|1','|9|8|1','|9|8|1','|9|8|1','|9|8|1','|9|8|1','|9|8|1','|9|8|1','|9|8|1','|9|8|1']
 			CreateSeededCard(message, args, seeds)
 		}
 		else if (args[9] == 'legendary') {
@@ -254,7 +263,7 @@ function CreateSeededCard(message, args, seeds) {
 	for (q = 0; q < args[3]; q++) {
 		//script takes args in order:
 		//temp, seed, tlevel, primetext, char length
-		exec(`bash ~/mtg-rnn/createpack.sh ${args[1]} ${args[5] + q} ${args[2]} "|${seeds[q]}" ${args[6]} "${args[13]}"`, (err, stdout, stderr) => {
+		exec(`bash ~/mtg-rnn/createpack.sh ${args[1]} ${args[5] + q} ${args[2]} "|${seeds[q]}" ${args[6]} "${args[12]}"`, (err, stdout, stderr) => {
 			if (err) {
 				console.log("card generate error")
 				args[10].push("card generate error")
@@ -263,7 +272,6 @@ function CreateSeededCard(message, args, seeds) {
 			//then sends to next function when all are done
 			//done this way because the `for` loop will finish execution before cards are done generating
 			args[11]++
-			console.log(`${args[11]}--${args[5]}`)
 			if (args[11] >= args[3])
 				ReadCards(message, args)
 		});
@@ -273,7 +281,7 @@ function CreateSeededCard(message, args, seeds) {
 function CreateSeededCardSerial(message, args, seeds) {
 	//script takes args in order:
 	//temp, seed, tlevel, primetext, char length
-	exec(`bash ~/mtg-rnn/createpack.sh ${args[1]} ${args[5]} ${args[2]} "|${seeds[cardstomake]}" ${args[6]} "${args[13]}"`, (err, stdout, stderr) => {
+	exec(`bash ~/mtg-rnn/createpack.sh ${args[1]} ${args[5]} ${args[2]} "|${seeds[cardstomake]}" ${args[6]} "${args[12]}"`, (err, stdout, stderr) => {
 		if (err) {
 			console.log("card generate error")
 			args[10].push("card generate error")
@@ -284,7 +292,6 @@ function CreateSeededCardSerial(message, args, seeds) {
 		args[11]++
 		args[5] = args[5] + 1
 		cardstomake++
-		console.log(`${cardstomake}--${args[5]}`)
 		if (args[11] >= args[3] || cardstomake >= args[3])
 			ReadCards(message, args)
 		else
@@ -328,11 +335,11 @@ function Splitcards(message, args) {
 			fs.unlinkSync(`/mnt/c/mtg-rnn/${datestr}.txt`);
 		}
 		else {
-			cardscreated += args[3]
-			WriteCardsCreated();
+			WriteCardsCreated(args[3]);
 			
 			//attach text file to channel message
-			message.channel.send(`${message.author}, Here is your file!`, {
+			message.channel.send({
+				content: `${message.author}, Here is your file!`,
 				files: [ `/mnt/c/mtg-rnn/${datestr}.mse-set` ]
 			}).then(function() {
 				//delete the created files
@@ -362,14 +369,14 @@ function CardCheckpoint(message, args) {
 //such as name, type, rules, etc...
 function SplitCardData(inputcard) {
 	try {
-		_array = inputcard.replace("_NOCOST_", "{0}").replace("_INVALID_",'').split('\n')
+		_array = inputcard.replace("_NOCOST_", '').replace("_INVALID_",'').split('\n')
 		//this removes empty lines
 		array = _array.filter(function (el) {
 			if (el.length > 0) return el;
 		});
 		
 		//splits card name from cost and capitalizes each word
-		return array[0].split(/{(.+)/)[0].capitalizeWords()
+		return array[0].split(/{(.+)/)[0]
 	}
 	catch (err) { return [''] } 
 }
@@ -378,56 +385,8 @@ function Embed_Newcard(message, args, names) {
 	const Embed = new Discord.MessageEmbed()
 		.setColor('#009900')
 		.setDescription(`requested by ${message.author}\nTemperature: ${args[1]}, Training Level: ${args[2] + 1}`)
-		.setFooter(`See \`mtg!help generate\``)
+		.setFooter({ text: `See \`mtg!help generate\`` })
 		.addFields({ name: `Names`, value: names.join('\n')})
 		
-	message.channel.send(Embed);
-}
-
-
-
-
-//
-//Write number of cards created to a file
-function WriteCardsCreated(){
-	var _num
-	//read file
-	fs.readFile('/mnt/c/mtg-rnn/cardscreated.txt', 'utf8', function (err, data) {
-		if (err) { console.log(err)}
-		//parse data to int and add to it
-		_num = parseInt(data)
-		_num += parseInt(cardscreated)
-		//write file
-		fs.writeFile('/mnt/c/mtg-rnn/cardscreated.txt', _num, 'utf8', function (err, data) {
-			_num = 0
-			cardscreated = 0
-		});
-	});
-}
-var cardscreated = 0;
-
-//
-//Various utility functions
-//
-function RndInteger(min, max) {
-  return Math.floor(Math.random() * (max - min) ) + min;
-}
-
-function dateTime() {
-	//get time info for logging
-	var today = new Date();
-	var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-	var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-	var dateTime = date+' '+time;
-	
-	return dateTime
-}
-
-String.prototype.capitalize = function() {
-  return this.charAt(0).toUpperCase() + this.slice(1)
-}
-
-String.prototype.capitalizeWords = function()
-{
- return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+	message.channel.send({embeds: [Embed]});
 }
