@@ -626,9 +626,10 @@ class Card:
             
             outstr += linebreak
 
-            outstr += ' '.join(self.__dict__[field_supertypes] + self.__dict__[field_types])
+            typeline = ' '.join(self.__dict__[field_supertypes] + self.__dict__[field_types]).title()
             if self.__dict__[field_subtypes]:
-                outstr += ' ' + utils.dash_marker + ' ' + ' '.join(self.__dict__[field_subtypes])
+                typeline += ' ' + utils.dash_marker + ' ' + ' '.join(self.__dict__[field_subtypes]).title()
+            outstr += typeline
 
             if self.__dict__[field_rarity]:
                 if self.__dict__[field_rarity] in utils.json_rarity_unmap:
@@ -731,7 +732,7 @@ class Card:
 
         if not self.__dict__[field_cost].none:            
             outstr += ('\tcasting_cost: ' 
-                       + self.__dict__[field_cost].format().replace('{','').replace('}','') 
+                       + self.__dict__[field_cost].format().replace('{','').replace('}','').replace('P','H') 
                        + '\n')
 
         outstr += '\tsuper_type: ' + ' '.join(self.__dict__[field_supertypes] 
