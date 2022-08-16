@@ -48,7 +48,7 @@ function Embed_Info(message, cards) {
 		MTG Neural Net Discord: https://discord.gg/EH4BTDk
 		RoboRosewater_Masters (run by Nyrt): https://twitter.com/RoborosewaterM`},
 		//field - Discord bot invite
-		{ name: `**Invite this bot to your server:**`, value: `https://discord.com/oauth2/authorize?client_id=733122248453390374&scope=bot&permissions=89088`}
+		{ name: `**Invite this bot to your server:**`, value: `https://discord.com/api/oauth2/authorize?client_id=733122248453390374&permissions=431644605504&scope=bot`}
 	)
 
 	message.channel.send({ embeds: [Embed] });

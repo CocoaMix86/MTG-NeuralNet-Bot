@@ -17,6 +17,7 @@ const fs = require('fs')
 const Discord = require('discord.js');
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const { RndInteger, capitalize, replaceManaSymbols, dateTime, toUnary, WriteCardsCreated, GenerationChannel } = require('../functions.js');
 const images = []
 fs.readdir(`/mnt/c/Discord Bot/Card Images/`, function (err, files) {
     //listing all files using forEach
@@ -35,9 +36,12 @@ function Start(message, _in) {
 	else
 		input = _in.join(" ")
 	input = input.replace('$', '').replace('\\', '').replace('/', '').replace('{', '').replace('.', '')
+	
+	//some logging
+	console.log(`[${dateTime()}] Lookup - ${message.guild.name}/${message.member.user.tag} lookup ${input}.`)
 
 	var results = fuzzysort.go(input, images, {limit: 5, threshold: -1000})
-	if (results.length == 1 || (results.length > 1 && results[0].score - results[1].score > 50)) {
+	if (results.length == 1 || (results.length > 1 && results[0].score - results[1].score > 50) || results[0].score == 0) {
 		message.channel.send({
 			content: `${results[0].target}`,
 			files: [ `/mnt/c/Discord Bot/Card Images/${results[0].target}.png` ]
