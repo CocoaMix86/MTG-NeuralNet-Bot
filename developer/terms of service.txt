@@ -1,0 +1,28 @@
+TERMS OF SERVICE
+
+Welcome to MTG Neural Net's Terms of Service. This document is a legal agreement between MTG Neural Net ("mtgneurlanet", "mtgnn", “us,” “our,” or "we") and you ("you" or “your”). By accessing our Discord "Bot", you are agreeing to be bound by our Terms of Service and agree that you are responsible for the agreement with any applicable local laws.
+
+You agree that you are 13 years of age and the minimum age of digital consent in your country. If you are between 13 (or the minimum age of digital consent, as applicable) and the age of majority in your jurisdiction, you agree that your legal guardian has reviewed and agrees to these terms.
+
+If you disagree with any of these terms, you are prohibited from accessing the bot.
+
+===============================
+
+1. GENERAL USAGE
+1.1. Please read the help that comes with the bot, using the command "mtg!help"
+
+1.2. You will not generate anything slanderous, racist, or otherwise derogatory towards any person, group, culture, etc. Doing so will result in your usage being reported to Discord and your server being banned from using the bot.
+
+1.3. Persuant to the above, the bot may sometimes "infinite monkey" its way into a slur. I have tried to implemented a slur filter, but of course, I can't get every single edge case.
+
+===============================
+
+2. BUG REPORTING
+2.1. You can report bugs on the MTG Neural Net Discord server (https://discord.gg/EH4BTDk)
+2.2. You can report bugs on this github page, under "Issues".
+
+===============================
+
+3. PRIVACY POLICY
+3.1. MTG Neural Net logs your username and the server name where commands are executed from, along with the timestamp.
+3.2. We store logs for a maximum of 30 days.
