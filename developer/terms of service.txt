@@ -24,5 +24,7 @@ If you disagree with any of these terms, you are prohibited from accessing the b
 ===============================
 
 3. PRIVACY POLICY
-3.1. MTG Neural Net logs your username and the server name where commands are executed from, along with the timestamp.
-3.2. We store logs for a maximum of 30 days.
+3.1. MTG Neural Net logs your username, the server name, the timestamp, and the message content of the command.
+3.2. A message is not logged if it did not start with the mtg! prefix
+3.3. We log this data for troubleshooting purposes, so faults and edge-cases can quickly be caught and patched.
+3.4. We store logs for a maximum of 30 days.
