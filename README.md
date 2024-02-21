@@ -1,13 +1,12 @@
 # MTG-NeuralNet-Bot
-A Discord bot for creating MTG cards by use of a neural network.
+A Discord bot for creating MTG cards by use of a neural network. This git is the Discord bot itself. The backend neuralnet is described below.  
+The neuralnet runs thanks to work of Billzorn: [https://github.com/billzorn/mtg-rnn]  
 
-The JS and bash scripts integrate with billzorn's fork of char-rnn, mtg-rnn, in the backend
-https://github.com/billzorn/mtg-rnn  
-
-I have forked billzorn's projects and updated files as needed. Links to them all here:  
+I have forked billzorn's projects and Torch and updated files as needed so they work for modern day. Links to them all here:  
 [https://github.com/CocoaMix86/cocoa-mtgnn-rnn]  
 [https://github.com/CocoaMix86/cocoa-mtgnn-encode]  
-[https://github.com/CocoaMix86/cocoa-mtgnn-models]
+[https://github.com/CocoaMix86/cocoa-mtgnn-models]  
+[https://github.com/CocoaMix86/cocoa-mtgnn-torch]
 
 # HOW TO SETUP
 I'll be running all of this in a Windows environment using Windows Subsystem for Linux. You can do it entirely in Linux (without Windows) if you want.
