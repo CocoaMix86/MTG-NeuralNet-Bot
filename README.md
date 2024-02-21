@@ -3,6 +3,12 @@ A Discord bot for creating MTG cards by use of a neural network.
 
 The JS and bash scripts integrate with billzorn's fork of char-rnn, mtg-rnn, in the backend
 https://github.com/billzorn/mtg-rnn  
+
+I have forked billzorn's projects and updated files as needed. Links to them all here:  
+[https://github.com/CocoaMix86/cocoa-mtgnn-rnn]  
+[https://github.com/CocoaMix86/cocoa-mtgnn-encode]  
+[https://github.com/CocoaMix86/cocoa-mtgnn-models]
+
 # HOW TO SETUP
 I'll be running all of this in a Windows environment using Windows Subsystem for Linux.
 
