@@ -10,7 +10,7 @@ I have forked billzorn's projects and updated files as needed. Links to them all
 [https://github.com/CocoaMix86/cocoa-mtgnn-models]
 
 # HOW TO SETUP
-I'll be running all of this in a Windows environment using Windows Subsystem for Linux.
+I'll be running all of this in a Windows environment using Windows Subsystem for Linux. You can do it entirely in Linux (without Windows) if you want.
 
 ## Setting up the Environment
 1. Get the Linux distro of your choice. I recommend Ubuntu for this as I know 100% that the installs all work in it. I'll be using Ubuntu 22.04 for this guide  
