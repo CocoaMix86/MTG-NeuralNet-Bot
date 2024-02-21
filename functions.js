@@ -1,42 +1,96 @@
 const fs = require('fs')
+const slurs = fs.readFileSync("/mnt/c/Discord Bot/mtgnet/slurs.txt").toString().split('\n');
 
 function GenerationChannel(message)
 {
 	var id = message.channel.id;
-	if (message.guild.name == 'MTG Neural Net' && id != '733313821153689622' && id != '850935526545424404' && id != '890996406087712780' && id != '971498472937259029'  && id != '734244277122760744' && id != '779947284262551584' && id != '779874832870277180') {
-		message.reply(`Please go to <#733313821153689622> or one of the other generation channels.`).then(msg => {
+	if (message.guild.name == 'MTG Neural Net' && id != '733313821153689622' && id != '850935526545424404' && id != '890996406087712780' && id != '971498472937259029'  && id != '734244277122760744' && id != '779947284262551584' && id != '779874832870277180' && id != '975949296140705792' && id != '1179091064703951030') {
+		try {
+			message.reply({content: `Please go to <#733313821153689622> or one of the other generation channels.`, ephemeral: true}).then(msg => {
 				setTimeout(() => msg.delete(), 10000)
-		});
+			});
+		} catch (err) { console.log(err) }
 		return false
 	}
 	return true
+}
+
+function ModelCheck(message, args)
+{
+	if (args[12] != 'mtg' && args[12] != 'msem' && args[12] != 'mixed' && args[12] != 'reminder' && args[12] != 'everything' && args[12] != 'goldfish'  && args[12] != 'slowlearn' && args[12] != 'fastlearn' && args[12] != 'trainfrac' && args[12] != 'mtg2' && args[12] != '') {
+		message.reply({content: `Model \`${args[12]}\` does not exist. Using \`mtg\` instead.`, ephemeral: true}).then(msg => {
+				setTimeout(() => msg.delete(), 10000)
+			});
+		args[12] = 'mtg'
+	}
+	else if (args[12] == '') {
+		if (message.channel.id == '734244277122760744')
+			args[12] = 'msem'
+		else if (message.channel.id == '779947284262551584')
+			args[12] = 'mixed'
+		else if (message.channel.id == '850935526545424404')
+			args[12] = 'reminder'
+		else if (message.channel.id == '890996406087712780')
+			args[12] = 'everything'
+		else
+			args[12] = 'mtg'
+	}
+
+	if (args[12] == 'goldfish') {
+		if (args[2] > 39)
+			args[2] = 39
+	}
+	else if (args[12] == 'msem' || args[12] == 'mixed') {
+		if (args[2] > 69)
+			args[2] = 69
+	}
+	else if (args[12] == 'fastlearn' || args[12] == 'trainfrac' || args[12] == 'slowlearn') {
+		if (args[2] > 69)
+			args[2] = 69
+	}
+	
+	return args
 }
 
 function RndInteger(min, max) {
   return Math.floor(Math.random() * (max - min) ) + min;
 }
 
+String.prototype.FilterSlur = FilterSlur;
+function FilterSlur (str)
+{
+	var _temp = this
+	for (index = 0; index < slurs.length; index++) {
+		var replace = slurs[index]
+		if (replace.length <= 4)
+			replace = ` ${replace} `
+		var re = new RegExp(replace,"gi");
+		_temp = _temp.replace(re, '\'')
+	}
+	return _temp
+}
+
 String.prototype.capitalize = capitalize;
 function capitalize (str)
 {
-  return this.charAt(0).toUpperCase() + str.slice(1)
+	return this.charAt(0).toUpperCase() + str.slice(1)
 }
 
 String.prototype.capitalizeWords = capitalizeWords;
 function capitalizeWords (str)
 {
- return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+	return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
 String.prototype.replaceManaSymbols = replaceManaSymbols;
 function replaceManaSymbols (str)
 {
-	return this.replace(/{W}/g, '<:W_:734751105699020860>')
-		.replace(/{U}/g, '<:U_:734751083230134282>')
-		.replace(/{B}/g, '<:B_:734751069892116545>')
-		.replace(/{R}/g, '<:R_:734751092319060018>')
-		.replace(/{G}/g, '<:G_:734751103912116265>')
-		.replace(/{C}/g, '<:C_:734751088720216134>')
+	return this.replace(/{W}/g, '<:WW:734751105699020860>')
+		.replace(/{U}/g, '<:UU:734751083230134282>')
+		.replace(/{B}/g, '<:BB:734751069892116545>')
+		.replace(/{R}/g, '<:RR:734751092319060018>')
+		.replace(/{G}/g, '<:GG:734751103912116265>')
+		.replace(/{C}/g, '<:CC:734751088720216134>')
 		//replace numbers
 		.replace(/\{0}/g, '<:0_:734751004679209031>')
 		.replace(/\{1}/g, '<:1_:734751006675435531>')
@@ -51,10 +105,10 @@ function replaceManaSymbols (str)
 		.replace(/\{10}/g, '<:10:734751069841653792>')
 		.replace(/\{11}/g, '<:11:734751070009688114>')
 		.replace(/\{12}/g, '<:12:734751040968327218>')
-		.replace(/{X}/g, '<:X_:734751108035117136>')
+		.replace(/{X}/g, '<:XX:734751108035117136>')
 		//replace misc symbols
-		.replace(/{S}/g, '<:S_:734751123847774299>')
-		.replace(/{E}/g, '<:E_:734885104756850709>')
+		.replace(/{S}/g, '<:SS:734751123847774299>')
+		.replace(/{E}/g, '<:EE:734885104756850709>')
 		.replace(/{T}/g, '<:T_:734751108358078554>')
 		.replace(/{Q}/g, '<:Q_:734751121054105652>')
 		//replace hybrid symbols
@@ -130,10 +184,11 @@ function WriteCardsCreated (numcards){
 		//parse data to int and add to it
 		_num = parseInt(data)
 		_num += parseInt(numcards)
+		console.log(_num)
 		//write file
 		fs.writeFile('/mnt/c/mtg-rnn/cardscreated.txt', _num.toString(), 'utf8', function (err, data) {
 		});
 	});
 }
 
-module.exports = { RndInteger, capitalize, capitalizeWords, replaceManaSymbols, dateTime, toUnary, WriteCardsCreated, GenerationChannel };
+module.exports = { RndInteger, capitalize, capitalizeWords, replaceManaSymbols, dateTime, toUnary, WriteCardsCreated, GenerationChannel, FilterSlur, ModelCheck };

@@ -1,4 +1,4 @@
-const { WriteCardsCreated } = require('./functions.js');
+const { WriteCardsCreated, FilterSlur } = require('./functions.js');
 const Discord = require('discord.js');
 
 //A middle point of functions. This is where finished cards are collected to
@@ -10,7 +10,11 @@ function CardCheckpoint(message, args) {
 		_separate[ii] = SplitCardData(args[10][ii])
 	}
 	
-	Embed_Newcard(message, args, _separate)
+	try {
+		Embed_Newcard(message, args, _separate)
+	} catch (err) {
+		console.log(err)
+	}
 }
 
 
@@ -19,7 +23,7 @@ function CardCheckpoint(message, args) {
 function SplitCardData(inputcard) {
 	var _array = []
 	try {
-		_array = inputcard.replace("_NOCOST_", "").replaceManaSymbols().replace("_INVALID_",'').split('\n')
+		_array = inputcard.replace("_NOCOST_", "").replaceManaSymbols().replace("_INVALID_",'').FilterSlur().split('\n')
 		cardtitle = _array[0].split(/<(.+)/) //splits cost from name
 		_array[0] = _array[0].replace(cardtitle, `**${cardtitle}**`) //Bold the name
 		_array[1] = _array[1].replace(' ~ ', ' — ').replace('~', '-') //TYPE LINE
@@ -28,8 +32,10 @@ function SplitCardData(inputcard) {
 		//check if card is longer than embed limits
 		if (_array.join('\n').length < 1024)
 			return _array
-		else
+		else {
+			console.log(_array.join('\n'))
 			return ['This card was malformatted (too long)','-','-']
+		}
 	}
 	catch (err) {
 		console.log(err)

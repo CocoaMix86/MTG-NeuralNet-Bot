@@ -5,11 +5,6 @@ const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 var fs = require('fs'); 
 
-//import commands
-//const client = new Discord.Client({
-	//partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-    //ws: { intents: ["GUILDS", "GUILD_MESSAGES"] }
-//});
 client.commands = new Discord.Collection();
 const cooldowns = new Discord.Collection();
 
@@ -43,7 +38,7 @@ for (const file of commandFiles) {
 
 client.on('messageCreate', message => {
 	//ignore anything that doesn't start with the prefix and is written by a bot
-	if ((!message.content.startsWith(prefix) && !message.content.includes('((')) || message.author.bot || message.member.user == null || message == null) return;
+	if ((!message.content.toLowerCase().startsWith(prefix) && !message.content.includes('((')) || message.author.bot || message.member.user == null || message == null) return;
 	//Separate arguements from main command
 	const args = message.content.slice(prefix.length).replace('`', '').replace(';', '').replace('#', '').replace('?', '').replace('<', '').replace('>', '').replace('|', '').replace('—', '--').replace('"', '\\"').split(' ');
 	
