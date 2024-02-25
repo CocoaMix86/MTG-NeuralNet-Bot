@@ -19,6 +19,22 @@ I'll be running all of this in a Windows environment using Windows Subsystem for
 3. You should now be logged in now
 ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/82f3895f-d8e9-4e33-b3ff-8884e17ae73f)  
 4. Setup **Torch** by running these commands  
-   1. `git clone https://github.com/CocoaMix86/cocoa-mtgnn-torch.git ~/torch --recursive`
-   2. `cd ~/torch; bash install-deps;` - this will install quite a few packages and take a few minutes.
-   3. `./install.sh` - this will also take a few minutes
+   1. `git clone https://github.com/CocoaMix86/cocoa-mtgnn-torch.git ~/torch --recursive`  
+   2. `cd ~/torch; bash install-deps;` - this will install quite a few packages and take a few minutes.  
+   3. `./install.sh` - this will also take a few minutes  
+   4.  `source ~/.bashrc`  
+5. Now we need to install a couple extra luarocks packages for Torch to use.  
+   1. `git config --global url."https://".insteadOf git://`  
+      1. this command reconfigures luarocks to use https:// instead of git://, since the git port has been restricted in recent times.  
+   3. `luarocks install nngraph`  
+   4. `luarocks install optim`  
+   5. `luarocks install nn`  
+6. If you'd like to train on an GPU (this can be to about 15x faster), you will have to install the CUDA Toolkit or packages for ATI. Use the appropriate step below.  
+   1. For Nvidia GPU using CUDA  
+      1. [Download the CUDA toolkit](https://developer.nvidia.com/cuda-downloads?target_os=Linux) that's right for your linux distro. Run the commands given on that page, then run the following luarocks commands.  
+         ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/5092a867-cb99-4ec6-b620-5bbf94233750)  
+      2. `luarocks install cutorch`  
+      3. `luarocks install cunn`  
+   2. For OpenCL GPU instead (e.g. ATI cards)  
+      1. `luarocks install cltorch`
+      2. `luarocks install clnn`
