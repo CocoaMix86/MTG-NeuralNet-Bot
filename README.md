@@ -11,7 +11,7 @@ I have forked billzorn's projects and Torch and updated files as needed so they 
 # HOW TO SETUP
 I'll be running all of this in a Windows environment using Windows Subsystem for Linux. You can do it entirely in Linux (without Windows) if you want.
 
-## Setting up the Environment
+## Setting up the neuralnet environment
 1. Get the Linux distro of your choice. I recommend Ubuntu for this as I know 100% that the installs all work in it. I'll be using Ubuntu 22.04 for this guide  
 ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/8a199676-20a7-4a88-92ca-c8c99b3b5327)
 2. Launch Ubuntu and wait a while for it to setup. It'll ask you to create a username and password. This can be anything you want.
