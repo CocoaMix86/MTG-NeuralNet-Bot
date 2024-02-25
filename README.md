@@ -31,10 +31,7 @@ I'll be running all of this in a Windows environment using Windows Subsystem for
    5. `luarocks install nn`  
 6. If you'd like to train on an GPU (this can be to about 15x faster), you will have to install the CUDA Toolkit or packages for ATI. Use the appropriate step below.  
    1. For Nvidia GPU using CUDA  
-      1. [Download the CUDA toolkit](https://developer.nvidia.com/cuda-downloads?target_os=Linux) that's right for your linux distro. Run the commands given on that page, then run the following luarocks commands.  
-         ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/5092a867-cb99-4ec6-b620-5bbf94233750)  
-      2. `luarocks install cutorch`  
-      3. `luarocks install cunn`  
+      1. [Follow these steps](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/blob/main/readme-NviduaCUDA)
    2. For OpenCL GPU instead (e.g. ATI cards)  
       1. `luarocks install cltorch`
       2. `luarocks install clnn`
