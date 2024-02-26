@@ -14,7 +14,8 @@ CUDA does not work out of the box on Ubuntu's kernel 19041 ([documented here](ht
 
 3. [Download the CUDA toolkit](https://developer.nvidia.com/cuda-downloads?target_os=Linux) that's right for your linux distro. Run the commands given on that page, then run the following luarocks commands.  
          ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/5092a867-cb99-4ec6-b620-5bbf94233750)  
-         this install will take several minutes and look like nothing is happening. Eventually a prompt will appear asking you to accept a EULA.  
+         this install will take several minutes and look like nothing is happening. Eventually a prompt will appear asking you to accept a EULA.
+   ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/ab3cc32c-531c-46b6-8484-7a31c2e8ffdc)  
       1. `luarocks install cutorch`  
       2. `luarocks install cunn`  
 
