@@ -20,3 +20,4 @@ CUDA does not work out of the box on Ubuntu's kernel 19041 ([documented here](ht
 2. Install these luarocks packages
    1. `luarocks install cutorch`
    2. `luarocks install cunn`  
+.
