@@ -18,18 +18,18 @@ I'll be running all of this in a Windows environment using Windows Subsystem for
 ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/b8f44b5e-353f-40c6-a4d1-dca35887de08)
 3. You should now be logged in now
 ![image](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/assets/5726733/82f3895f-d8e9-4e33-b3ff-8884e17ae73f)  
-4. Setup **Torch** by running these commands  
-   1. `git clone https://github.com/CocoaMix86/cocoa-mtgnn-torch.git ~/torch --recursive`  
-   2. `cd ~/torch; bash install-deps;` - this will install quite a few packages and take a few minutes.  
-   3. `./install.sh` - this will also take a few minutes  
-   4.  `source ~/.bashrc`  
-5. Now we need to install a couple extra luarocks packages for Torch to use.  
+4. Setup **Torch** by running these commands
    1. `git config --global url."https://".insteadOf git://`  
       1. this command reconfigures luarocks to use https:// instead of git://, since the git port has been restricted in recent times.  
+   2. `git clone https://github.com/CocoaMix86/cocoa-mtgnn-torch.git ~/torch --recursive`  
+   3. `cd ~/torch; bash install-deps;` - this will install quite a few packages and take a few minutes.  
+   4. `./install.sh` - this will also take a few minutes  
+   5.  `source ~/.bashrc`  
+6. Now we need to install a couple extra luarocks packages for Torch to use.  
    3. `luarocks install nngraph`  
    4. `luarocks install optim`  
    5. `luarocks install nn`  
-6. If you'd like to train on an GPU (this can be to about 15x faster), you will have to install the CUDA Toolkit or packages for ATI. Use the appropriate step below.  
+7. If you'd like to train on an GPU (this can be to about 15x faster), you will have to install the CUDA Toolkit or packages for ATI. Use the appropriate step below.  
    1. For Nvidia GPU using CUDA  
       1. [Follow these steps](https://github.com/CocoaMix86/MTG-NeuralNet-Bot/blob/main/readme-NviduaCUDA)
    2. For OpenCL GPU instead (e.g. ATI cards)  
